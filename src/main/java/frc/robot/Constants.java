@@ -39,10 +39,13 @@ public final class Constants {
   public static int CANCoderBackRightId = 13;
   public static int PigeonId = 61;
 
-  public static double FrontLeftEncoderOffset = -0.462;
-  public static double FrontRightEncoderOffset = -0.245;
-  public static double BackLeftEncoderOffset = -0.433;
-  public static double BackRightEncoderOffset = 0.077;
+  // public static double FrontLeftEncoderOffset = 0.3;
+  // public static double FrontRightEncoderOffset = 0.5;
+  public static double FrontLeftEncoderOffset = 0.061;
+  public static double FrontRightEncoderOffset = -0.248;
+
+  public static double BackLeftEncoderOffset = 0.061;
+  public static double BackRightEncoderOffset = 0.08;
 
 
 

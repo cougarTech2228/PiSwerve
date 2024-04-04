@@ -14,6 +14,8 @@
 package frc.robot.subsystems.drive;
 
 import frc.robot.Constants;
+
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
@@ -49,7 +51,7 @@ public class ModuleIOSparkMax implements ModuleIO {
 
   private final RelativeEncoder driveEncoder;
   private final RelativeEncoder turnRelativeEncoder;
-  private final AnalogInput turnAbsoluteEncoder;
+  private final CANcoder cancoder;
   private final Queue<Double> timestampQueue;
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
@@ -62,26 +64,26 @@ public class ModuleIOSparkMax implements ModuleIO {
       case 0:
         driveSparkMax = new CANSparkMax(Constants.FrontLeftDriveMotorId, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(Constants.FrontLeftSteerId, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(Constants.CANCoderFrontLeftId);
-        absoluteEncoderOffset = new Rotation2d(Constants.FrontLeftEncoderOffset); // MUST BE CALIBRATED
+        cancoder = new CANcoder(Constants.CANCoderFrontLeftId);
+        absoluteEncoderOffset = new Rotation2d(Units.rotationsToRadians(Constants.FrontLeftEncoderOffset)); // MUST BE CALIBRATED
         break;
       case 1:
         driveSparkMax = new CANSparkMax(Constants.FrontRightDriveMotorId, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(Constants.FrontRightSteerId, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(Constants.CANCoderFrontRightId);
-        absoluteEncoderOffset = new Rotation2d(Constants.FrontRightEncoderOffset); // MUST BE CALIBRATED
+        cancoder = new CANcoder(Constants.CANCoderFrontRightId);
+        absoluteEncoderOffset = new Rotation2d(Units.rotationsToRadians(Constants.FrontRightEncoderOffset)); // MUST BE CALIBRATED
         break;
       case 2:
         driveSparkMax = new CANSparkMax(Constants.BackLeftDriveMotorId, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(Constants.BackLeftSteerId, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(Constants.CANCoderBackLeftId);
-        absoluteEncoderOffset = new Rotation2d(Constants.BackLeftEncoderOffset); // MUST BE CALIBRATED
+        cancoder = new CANcoder(Constants.CANCoderBackLeftId);
+        absoluteEncoderOffset = new Rotation2d(Units.rotationsToRadians(Constants.BackLeftEncoderOffset)); // MUST BE CALIBRATED
         break;
       case 3:
         driveSparkMax = new CANSparkMax(Constants.BackRightDriveMotorId, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(Constants.BackRightSteerId, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(Constants.CANCoderBackRightId);
-        absoluteEncoderOffset = new Rotation2d(Constants.BackRightEncoderOffset); // MUST BE CALIBRATED
+        cancoder = new CANcoder(Constants.CANCoderBackRightId);
+        absoluteEncoderOffset = new Rotation2d(Units.rotationsToRadians(Constants.BackRightEncoderOffset)); // MUST BE CALIBRATED
         break;
       default:
         throw new RuntimeException("Invalid module index");
@@ -155,9 +157,8 @@ public class ModuleIOSparkMax implements ModuleIO {
     inputs.driveCurrentAmps = new double[] {driveSparkMax.getOutputCurrent()};
 
     inputs.turnAbsolutePosition =
-        new Rotation2d(
-                turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V() * 2.0 * Math.PI)
-            .minus(absoluteEncoderOffset);
+            Rotation2d.fromRotations(cancoder.getAbsolutePosition().getValueAsDouble())
+                .minus(absoluteEncoderOffset);
     inputs.turnPosition =
         Rotation2d.fromRotations(turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO);
     inputs.turnVelocityRadPerSec =
